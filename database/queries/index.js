@@ -9,7 +9,7 @@ import {
   replaceMongoIdInObject,
 } from "@/utils/data-utils";
 
-export async function getAllHotels(destination, checkin, checkout) {
+export async function getAllHotels(destination, checkin, checkout, category) {
   const regex = new RegExp(destination, "i");
   const hotelsByDestination = await hotelModel
     .find({ city: { $regex: regex } })
@@ -23,6 +23,12 @@ export async function getAllHotels(destination, checkin, checkout) {
     ])
     .lean();
   let allHotels = hotelsByDestination;
+  if (category) {
+    const categoriesToMatch = category.split("|");
+    allHotels = allHotels.filter((hotel) => {
+      return categoriesToMatch.includes(hotel.propertyCategory.toString());
+    });
+  }
 
   if (checkin && checkout) {
     allHotels = await Promise.all(
@@ -81,4 +87,9 @@ export async function getReviwsAHotels(hotelId) {
 export async function getUserByEmail(email) {
   const users = await userModel.find({ email: email }).lean();
   return replaceMongoIdInObject(users[0]);
+}
+
+export async function getBookingsByUser(userId) {
+  const bookings = await bookingModel.find({ userId: userId }).lean();
+  return replaceMongoIdInArray(bookings);
 }
