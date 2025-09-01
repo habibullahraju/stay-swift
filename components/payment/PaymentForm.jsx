@@ -1,6 +1,40 @@
-const PaymentForm = () => {
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+const PaymentForm = ({ checkin, checkout, loggedInUser, hotelInfo }) => {
+  const [error, setError] = useState();
+  const router = useRouter();
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const formData = new FormData(event.currentTarget);
+      const hotelId = hotelInfo?.id;
+      const userId = loggedInUser?.id;
+      const checkin = formData.get("checkin");
+      const checkout = formData.get("checkout");
+
+      const res = await fetch(`/api/auth/payment`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/josn",
+        },
+        body: JSON.stringify({
+          hotelId,
+          userId,
+          checkin,
+          checkout,
+        }),
+      });
+      res.status === 201 && router.push("/bookings");
+    } catch (error) {
+      console.log(error);
+      setError(error.message);
+    }
+  };
+
   return (
-    <form className="my-8">
+    <form className="my-8" onSubmit={onSubmit}>
       <div className="my-4 space-y-2">
         <label htmlFor="name" className="block">
           Name
@@ -8,6 +42,7 @@ const PaymentForm = () => {
         <input
           type="text"
           id="name"
+          value={loggedInUser?.name}
           className="w-full border border-[#CCCCCC]/60 py-1 px-2 rounded-md"
         />
       </div>
@@ -18,6 +53,7 @@ const PaymentForm = () => {
         </label>
         <input
           type="email"
+          value={loggedInUser?.email}
           id="email"
           className="w-full border border-[#CCCCCC]/60 py-1 px-2 rounded-md"
         />
@@ -26,14 +62,14 @@ const PaymentForm = () => {
       <div className="my-4 space-y-2">
         <span>Check in</span>
         <h4 className="mt-2">
-          <input type="date" name="checkin" id="checkin" />
+          <input value={checkin} type="date" name="checkin" id="checkin" />
         </h4>
       </div>
 
       <div className="my-4 space-y-2">
         <span>Checkout</span>
         <h4 className="mt-2">
-          <input type="date" name="checkout" id="checkout" />
+          <input value={checkout} type="date" name="checkout" id="checkout" />
         </h4>
       </div>
 

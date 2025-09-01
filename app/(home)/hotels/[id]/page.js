@@ -7,6 +7,7 @@ export default async function hotelDetailsPage({
   params: { id },
   searchParams: { checkin, checkout },
 }) {
+  console.log(checkin, checkout)
   const hotelInfo = await getHotelById(id, checkin, checkout);
 
   return (
